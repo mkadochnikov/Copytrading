@@ -201,7 +201,12 @@ class BinanceWebSocketManager:
         self.max_reconnect_attempts = 10
         
         # Создаем клиент для получения listen key
-        self.client = Client(api_key, api_secret, testnet=False)
+        self.client = Client(
+            api_key, 
+            api_secret, 
+            testnet=False,
+            requests_params={'timeout': 60}
+        )
     
     def get_listen_key(self):
         """Получение listen key для user data stream"""
@@ -315,9 +320,19 @@ class TradeCopyService:
         self.db = DatabaseManager()
         self.running = False
         
-        # Клиенты Binance
-        self.source_client = Client(self.source_api_key, self.source_secret, testnet=False)
-        self.target_client = Client(self.target_api_key, self.target_secret, testnet=True)
+        # Клиенты Binance с увеличенным recvWindow
+        self.source_client = Client(
+            self.source_api_key, 
+            self.source_secret, 
+            testnet=False,
+            requests_params={'timeout': 60}
+        )
+        self.target_client = Client(
+            self.target_api_key, 
+            self.target_secret, 
+            testnet=True,
+            requests_params={'timeout': 60}
+        )
         
         # WebSocket менеджер
         self.ws_manager = BinanceWebSocketManager(
@@ -391,7 +406,8 @@ class TradeCopyService:
                 symbol=trade_info['symbol'],
                 side=trade_info['side'],
                 type='MARKET',
-                quantity=trade_info['quantity']
+                quantity=trade_info['quantity'],
+                recvWindow=60000
             )
             
             return {
@@ -414,11 +430,11 @@ class TradeCopyService:
         """Обновление позиций в базе данных"""
         try:
             # Получаем позиции с реального аккаунта
-            real_positions = self.source_client.futures_position_information()
+            real_positions = self.source_client.futures_position_information(recvWindow=60000)
             self.db.update_positions('real', real_positions)
             
             # Получаем позиции с тестового аккаунта
-            test_positions = self.target_client.futures_position_information()
+            test_positions = self.target_client.futures_position_information(recvWindow=60000)
             self.db.update_positions('testnet', test_positions)
             
             logger.info("Позиции обновлены в базе данных")
@@ -432,8 +448,8 @@ class TradeCopyService:
         
         # Проверяем подключение к API
         try:
-            self.source_client.futures_account()
-            self.target_client.futures_account()
+            self.source_client.futures_account(recvWindow=60000)
+            self.target_client.futures_account(recvWindow=60000)
             logger.info("Подключение к Binance API успешно")
         except Exception as e:
             logger.error(f"Ошибка подключения к API: {e}")
