@@ -1,11 +1,11 @@
-setuptools>=68.0.0
-wheel>=0.41.0
-binance-futures-connector>=4.1.0
-streamlit>=1.29.0
-pandas>=2.1.0
-numpy>=1.25.0
-python-dotenv>=1.0.0
-requests>=2.31.0
-plotly>=5.17.0
-schedule>=1.2.0
+streamlit==1.46.0
+binance-futures-connector==4.1.0
+python-binance==1.0.19
+pandas==2.3.0
+plotly==6.1.2
+python-dotenv==1.1.1
+requests==2.32.4
+schedule==1.2.2
+websocket-client==1.8.0
+websockets==13.1
 

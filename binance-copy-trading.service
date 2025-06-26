@@ -1,0 +1,29 @@
+[Unit]
+Description=Binance Trade Copier Background Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/Copytrading
+Environment=PATH=/usr/bin:/usr/local/bin
+Environment=PYTHONPATH=/home/ubuntu/Copytrading
+ExecStart=/usr/bin/python3 /home/ubuntu/Copytrading/src/background_service.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=binance-copy-trading
+
+# Настройки безопасности
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/ubuntu/Copytrading/data /home/ubuntu/Copytrading/logs
+
+[Install]
+WantedBy=multi-user.target
+
