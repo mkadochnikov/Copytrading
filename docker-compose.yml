@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  binance-trade-copier:
+    build: .
+    container_name: binance-trade-copier
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+    environment:
+      - PYTHONPATH=/app/src
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_HEADLESS=true
+    restart: unless-stopped
+    networks:
+      - binance-network
+
+  # Дополнительный сервис для запуска только мониторинга (без веб-интерфейса)
+  binance-monitor:
+    build: .
+    container_name: binance-monitor
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+    environment:
+      - PYTHONPATH=/app/src
+    command: ["python", "src/main.py"]
+    restart: unless-stopped
+    networks:
+      - binance-network
+    profiles:
+      - monitor-only
+
+networks:
+  binance-network:
+    driver: bridge
+
